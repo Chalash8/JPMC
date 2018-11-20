@@ -4,7 +4,7 @@ import datetime
 ms_id = '1xGENEoj0bLDss5uwQn0DdmAXhpZfyMDZXFzTESbyPx8'
 week_end_str = raw_input('Enter Week End Date: ')
 
-ts_lists = fun.get_spreadsheet_values(fun.get_timesheet_id(week_end_str),"Invoice")
+ts_lists = fun.get_spreadsheet_values(fun.get_timesheet_id(week_end_str,'0Bzzqy5DUeqkyZ1o5azktY3ZscnM'),"Invoice")
 ms_lists = fun.get_spreadsheet_values(ms_id,"Define")
 
 source = ['JPAZ-GD','JPBR-GD','JPCH-GD','JPFW-GD','JPLV-GD','JPVT-GD']
@@ -54,7 +54,7 @@ if br > 0:
 if ch > 0:
     print ('Chicago USCIS has Time')
     id = fun.copy_old_ss(fun.get_most_recent_file_id('0Bx6LO7D0JLPzQ3dWVzcxSmZtSXc'),week_end_str)
-    invoice_num = fun.get_invoice_num(we_date)
+    invoice_num = fun.get_invoice_num(we_date,'0Bx6LO7D0JLPzQ3dWVzcxSmZtSXc')
     fun.write_to_spreadsheet(id,ch_lists,invoice_num)
 if fw > 0:
     print ('ERROR: Fort Worth has Time no sheet created')
@@ -63,6 +63,6 @@ if lv > 0:
 if vt > 0:
     print ('Vermont has Time')
     id = fun.copy_old_ss(fun.get_most_recent_file_id('0Bx6LO7D0JLPzSHBkUTIwQnE0Vmc'),week_end_str)
-    invoice_num = fun.get_invoice_num(we_date)
-    invoice_num += "-CH"
+    invoice_num = fun.get_invoice_num(we_date,'0Bx6LO7D0JLPzSHBkUTIwQnE0Vmc')
+
     fun.write_to_spreadsheet(id,vt_lists,invoice_num)

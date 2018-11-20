@@ -19,10 +19,10 @@ def get_drive_service():
     return service
 
 
-def get_timesheet_id(week_end):
-    results = get_drive_service().files().list(q="'0Bzzqy5DUeqkyZ1o5azktY3ZscnM' in parents", fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
+def get_timesheet_id(week_end, folder_id):
+    results = get_drive_service().files().list(q="'{}' in parents".format(folder_id), fields="nextPageToken, files(id, name)").execute()
 
+    items = results.get('files', [])
     if not items:
         print('No files found.')
     else:
@@ -75,10 +75,7 @@ def write_to_spreadsheet(ss_id,cell_matrix,invoice_num):
 
         wks.update_value('J2',invoice_num)
         wks.update_value('K2', str(date.today()))
-    print (cell_matrix[0][1] + " has been written")
-
-def run_script():
-    c = pygsheets.authorize()
+    print (str(invoice_num) + " has been written")
 
 
 def get_most_recent_file_id(folder_id):
@@ -95,8 +92,7 @@ def copy_old_ss(ss_id,week_end_str):
     service = get_drive_service()
     file = service.files().get(fileId=ss_id).execute()
     if file['name'] == week_end_str or file['name'] ==  week_end_str+" CH":
-        print('File aready exists:')
-        print(file)
+        print('File aready exists: ' + file['name'])
         return ss_id
     elif "CH" in file['name']:
         copied_file = {'name': week_end_str+" CH"}
@@ -105,23 +101,34 @@ def copy_old_ss(ss_id,week_end_str):
         copied_file = {'name': week_end_str}
         return service.files().copy(fileId=ss_id, body=copied_file).execute()['id']
 
-def get_invoice_num(we_date):
+def get_invoice_num(we_date, folder_id):
     service = get_drive_service()
     we_date = we_date - datetime.timedelta(days=7)
     we_date_str = 'WE' + str(we_date)
-    ss_id = get_timesheet_id(we_date_str)
-    return raw_input('Enter the invoice number for ' + ss_id + ': ')
+    if folder_id == '0Bx6LO7D0JLPzSHBkUTIwQnE0Vmc':
+        we_date_str += ' CH'
+    ss_id = get_timesheet_id(we_date_str, folder_id)
+    c = pygsheets.authorize()
+    sh = c.open_by_key(ss_id)
+    wks = sh.sheet1
+    cell = wks.cell('j2')
+    if len(cell.value) > 4:
+        invoice_num = int(cell.value[:4]) + 1
+        invoice_num = str(invoice_num) + cell.value[-3:]
+    else:
+        invoice_num = int(cell.value) + 1
+    return invoice_num
+
 
 
 def temp():
     if ss_id == None:
-        return raw_input('Enter the invoice number for Chicago USCIS: ') 
+        return raw_input('Enter the invoice number for Chicago USCIS: ')
     else:
         c = pygsheets.authorize()
         sh = c.open_by_key(ss_id)
         wks = sh.sheet1
         cell = wks.cell('j2')
         invoice_num = int(cell.value)
-
         print(invoice_num)
         return invoice_num + 1
